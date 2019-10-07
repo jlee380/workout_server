@@ -1,9 +1,10 @@
 const express = require('express');
-const User = require('../models/user.model');
 const mongoose = require('mongoose');
-
 const router = express.Router();
 
+const User = require('../models/user.model');
+
+// Gettging all users in a database
 router.get('/', (req, res, next) => {
     User.find()
         .exec()
@@ -19,6 +20,7 @@ router.get('/', (req, res, next) => {
         });
 });
 
+// Getting a user by id
 router.get('/:userId', (req, res, next) => {
     const id = req.params.userId;
     User.findById(id)
@@ -37,6 +39,7 @@ router.get('/:userId', (req, res, next) => {
         });
 });
 
+// Adding a user to a database
 router.post('/add', (req, res, next) => {
     const newUser = new User({
         _id: new mongoose.Types.ObjectId(),
@@ -59,6 +62,26 @@ router.post('/add', (req, res, next) => {
         .catch(err => {
             console.log(err);
             res.status(500).json({ error: err });
+        });
+});
+
+// Adding a gym to a user
+router.post('/:userId', (req, res, next) => {
+    const gymId = req.body.gymId;
+    const userId = req.params.userId;
+
+    User.findByIdAndUpdate(userId, { $push: { gym: gymId } })
+        .exec()
+        .then(result => {
+            console.log(result);
+            res.status(201).json({
+                message: 'Handling add gym to user',
+                registedGym: result
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: err.message });
         });
 });
 
@@ -85,6 +108,7 @@ router.post('/add', (req, res, next) => {
 //         });
 // });
 
+// Deleting a user by id
 router.delete('/:userId', (req, res, next) => {
     const id = req.params.userId;
     User.remove({ _id: id })

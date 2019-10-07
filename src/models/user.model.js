@@ -4,12 +4,13 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
     {
-        _id: mongoose.Schema.Types.ObjectId,
         username: String,
         email: String,
         firstName: String,
         lastName: String,
-        gender: 0
+        gender: 0,
+
+        gym: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Gym' }]
     },
     {
         timestamps: true

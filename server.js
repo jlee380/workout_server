@@ -7,6 +7,7 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const user = require('./src/routes/user');
+const gym = require('./src/routes/gym');
 
 const app = express();
 // Bodyparser Middelware
@@ -30,6 +31,7 @@ connection.once('open', () => {
 });
 
 app.use('/user', user);
+app.use('/gym', gym);
 
 app.use((req, res, next) => {
     const error = new Error('not found');

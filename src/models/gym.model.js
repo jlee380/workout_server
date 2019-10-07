@@ -2,25 +2,21 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
+// const User = require('./type');
+
 const gymSchema = new Schema(
-	{
-		company: 'string',
-		gymId: 'string',
-		location: {
-			gymId: 'string',
-			lat: 0.0,
-			long: 0.0,
-			street: 'string',
-			secondaryStree: 'string',
-			postalCode: 'string',
-			city: 'string',
-			country: 'string',
-			province: 'string'
-		}
-	},
-	{
-		timestamps: true
-	}
+    {
+        company: String,
+        name: String,
+        formattedAddress: String,
+        lat: Number,
+        lng: Number,
+
+        user: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    },
+    {
+        timestamps: true
+    }
 );
 
 const Gym = mongoose.model('Gym', gymSchema);
