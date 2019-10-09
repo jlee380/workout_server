@@ -25,7 +25,8 @@ router.get('/', (req, res, next) => {
 router.get('/:gymId', (req, res, next) => {
     const id = req.params.gymId;
     Gym.findById(id)
-        .populate('User')
+        .populate('user')
+        .exec()
         .then(doc => {
             console.log('This is from database', doc);
             if (doc) {
@@ -61,7 +62,7 @@ router.post('/:gymId', (req, res, next) => {
 });
 
 // Adding a gym to database
-router.post('/add', (req, res, next) => {
+router.post('/', (req, res, next) => {
     const newGym = new Gym({
         _id: new mongoose.Types.ObjectId(),
         company: req.body.company,
@@ -82,7 +83,7 @@ router.post('/add', (req, res, next) => {
         })
         .catch(err => {
             console.log(err);
-            res.status(500).json({ error: err.message });
+            res.status(500).json({ error: err });
         });
 });
 
