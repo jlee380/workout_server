@@ -3,11 +3,12 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 const Gym = require('../models/gym.model');
-const User = require('../models/user.model');
+const Users = require('../models/users.model');
 
 // Getting all gyms in a database
 router.get('/', (req, res, next) => {
     Gym.find()
+        .populate('users')
         .exec()
         .then(docs => {
             console.log(docs);
@@ -25,7 +26,7 @@ router.get('/', (req, res, next) => {
 router.get('/:gymId', (req, res, next) => {
     const id = req.params.gymId;
     Gym.findById(id)
-        .populate('user')
+        .populate('users')
         .exec()
         .then(doc => {
             console.log('This is from database', doc);
@@ -46,19 +47,44 @@ router.post('/:gymId', (req, res, next) => {
     const gymId = req.params.gymId;
     const userId = req.body.userId;
 
-    Gym.findByIdAndUpdate(gymId, { $push: { user: userId } })
-        .exec()
-        .then(result => {
-            console.log(result);
-            res.status(201).json({
-                message: 'Handling add user to gym',
-                registedGym: result
-            });
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({ error: err.message });
+    Gym.findOne({ _id: gymId }, (err, gym) => {
+        //
+        const registeredUser = gym.users.filter(user => {
+            return user._id === userId;
         });
+
+        if (registeredUser.length === 0) {
+            Gym.findByIdAndUpdate(gymId, { $push: { users: userId } })
+                .exec()
+                .then(result => {
+                    console.log(result);
+
+                    res.status(201).json({
+                        message: 'Handling add a user to a gym',
+                        registedGym: result
+                    });
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({ error: err.message });
+                });
+            Users.findByIdAndUpdate(userId, { $push: { gym: gymId } })
+                .exec()
+                .then(result => {
+                    console.log(result);
+                    res.status(201).json({
+                        message: 'Handling add a gym to a user',
+                        registedGym: result
+                    });
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({ error: err.message });
+                });
+        } else {
+            res.status(404).json({ message: 'User exists' });
+        }
+    });
 });
 
 // Adding a gym to database
@@ -88,19 +114,62 @@ router.post('/', (req, res, next) => {
 });
 
 // Deleting a gym by id
+// router.delete('/:gymId', (req, res, next) => {
+//     const id = req.params.gymId;
+//     Gym.remove({ _id: id })
+//         .exec()
+//         .then(result => {
+//             res.status(200).json(result);
+//         })
+//         .catch(err => {
+//             console.log(err);
+//             res.status(500).json({
+//                 error: err
+//             });
+//         });
+// });
+
+// router.delete('/:gymId', (req, res, next) => {
+//     const id = req.params.gymId;
+//     Gym.remove({ _id: id })
+//         .exec()
+//         .then(result => {
+//             res.status(200).json(result);
+//         })
+//         .catch(err => {
+//             console.log(err);
+//             res.status(500).json({
+//                 error: err
+//             });
+//         });
+// });
+
 router.delete('/:gymId', (req, res, next) => {
-    const id = req.params.gymId;
-    Gym.remove({ _id: id })
-        .exec()
-        .then(result => {
-            res.status(200).json(result);
-        })
-        .catch(err => {
+    const gymId = req.params.gymId;
+    const userId = req.body.userId;
+
+    Gym.find({}, (err, gym) => {
+        if (err) {
             console.log(err);
-            res.status(500).json({
-                error: err
-            });
+            res.status(404).json({ message: 'No user exist' });
+        }
+        gym.users.map(user => {
+            if (user._id === userId) {
+                Gym.findByIdAndUpdate(gymId, { $pull: { users: userId } });
+            }
         });
+    });
+    // Gym.find({ _id: gymId }, { $pull: userId })
+    //     .exec()
+    //     .then(result => {
+    //         console.log(result);
+    //     })
+    //     .catch(err => {
+    //         console.log(err);
+    //         res.status(500).json({
+    //             error: err
+    //         });
+    //     });
 });
 
 module.exports = router;

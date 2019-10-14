@@ -2,11 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 
-const User = require('../models/user.model');
+const Users = require('../models/users.model');
+const Gym = require('../models/gym.model');
 
 // Gettging all users in a database
 router.get('/', (req, res, next) => {
-    User.find()
+    Users.find()
         .exec()
         .then(docs => {
             console.log(docs);
@@ -23,7 +24,7 @@ router.get('/', (req, res, next) => {
 // Getting a user by id
 router.get('/:userId', (req, res, next) => {
     const id = req.params.userId;
-    User.findById(id)
+    Users.findById(id)
         .exec()
         .then(doc => {
             console.log('This is from database', doc);
@@ -41,7 +42,7 @@ router.get('/:userId', (req, res, next) => {
 
 // Adding a user to a database
 router.post('/add', (req, res, next) => {
-    const newUser = new User({
+    const newUsers = new Users({
         _id: new mongoose.Types.ObjectId(),
         username: req.body.username,
         email: req.body.email,
@@ -50,7 +51,7 @@ router.post('/add', (req, res, next) => {
         gender: req.body.gender
     });
 
-    newUser
+    newUsers
         .save()
         .then(result => {
             console.log('this is req.body', req.body);
@@ -70,7 +71,7 @@ router.post('/:userId', (req, res, next) => {
     const gymId = req.body.gymId;
     const userId = req.params.userId;
 
-    User.findByIdAndUpdate(userId, { $push: { gym: gymId } })
+    Users.findByIdAndUpdate(userId, { $push: { gym: gymId } })
         .exec()
         .then(result => {
             console.log(result);
@@ -94,7 +95,7 @@ router.post('/:userId', (req, res, next) => {
 //         updateOperation[paramter.propName] = operation.value;
 //     }
 
-//     User.update({ _id: id }, { $set: updateOperation })
+//     Users.update({ _id: id }, { $set: updateOperation })
 //         .exec()
 //         .then(result => {
 //             console.log(result);
@@ -110,18 +111,39 @@ router.post('/:userId', (req, res, next) => {
 
 // Deleting a user by id
 router.delete('/:userId', (req, res, next) => {
-    const id = req.params.userId;
-    User.remove({ _id: id })
-        .exec()
-        .then(result => {
-            res.status(200).json(result);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            });
-        });
+    const userId = req.params.userId;
+
+    // Users.findOne({ _id: userId }, (err, user) => {
+    //     if (err) {
+    //         console.log(err);
+    //         res.status(404).json({ message: 'No user found' });
+    //     }
+
+    //     user.gym.map(g => {
+    //         Users.findByIdAndUpdate(userId, { $pull: { gym: g } })
+    //             .exec()
+    //             .then(result => {
+    //                 console.log(result);
+    //                 res.status(200).json(result);
+    //             })
+    //             .catch(err => {
+    //                 console.log(err);
+    //                 res.status(404).json({ error: err });
+    //             });
+    //     });
+    // });
+
+    // Users.remove({ _id: userId })
+    //     .exec()
+    //     .then(result => {
+    //         res.status(200).json(result);
+    //     })
+    //     .catch(err => {
+    //         console.log(err);
+    //         res.status(500).json({
+    //             error: err
+    //         });
+    //     });
 });
 
 module.exports = router;
