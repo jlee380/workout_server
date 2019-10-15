@@ -11,7 +11,7 @@ const gymSchema = new Schema(
         lat: Number,
         lng: Number,
 
-        user: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+        users: [{ type: Schema.Types.ObjectId, ref: 'Users' }]
     },
     {
         timestamps: true

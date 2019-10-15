@@ -6,7 +6,7 @@ const morgan = require('morgan');
 
 require('dotenv').config();
 
-const user = require('./src/routes/user');
+const users = require('./src/routes/users');
 const gym = require('./src/routes/gym');
 
 const app = express();
@@ -30,7 +30,7 @@ connection.once('open', () => {
     console.log('MongoDB database connection established successfully');
 });
 
-app.use('/user', user);
+app.use('/users', users);
 app.use('/gym', gym);
 
 app.use((req, res, next) => {
