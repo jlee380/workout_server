@@ -129,4 +129,5 @@ router.delete('/:gymId', (req, res, next) => {
         });
 });
 
+
 module.exports = router;
