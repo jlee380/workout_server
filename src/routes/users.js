@@ -88,26 +88,28 @@ router.post('/:userId', (req, res, next) => {
 
 // REFECTORING
 
-// router.patch('/:userId', (req, res, next) => {
-//     const id = req.params.userId;
-//     const updateOperation = {};
-//     for (const paramter of req.body) {
-//         updateOperation[paramter.propName] = operation.value;
-//     }
+router.patch('/:userId', (req, res, next) => {
+    const id = req.params.userId;
 
-//     Users.update({ _id: id }, { $set: updateOperation })
-//         .exec()
-//         .then(result => {
-//             console.log(result);
-//             res.status(200).json(result);
-//         })
-//         .catch(err => {
-//             console.log(err);
-//             res.status(500).json({
-//                 error: err
-//             });
-//         });
-// });
+    // This is to allow to update whatever parameters provided in a request body
+    const updateOperation = {};
+    for (const paramter of req.body) {
+        updateOperation[paramter.propName] = paramter.value;
+    }
+
+    Users.update({ _id: id }, { $set: updateOperation })
+        .exec()
+        .then(result => {
+            console.log(result);
+            res.status(200).json(result);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
 
 // Deleting a user by id
 router.delete('/:userId', (req, res, next) => {

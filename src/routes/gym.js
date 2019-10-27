@@ -8,7 +8,7 @@ const Users = require('../models/users.model');
 // Getting all gyms in a database
 router.get('/', (req, res, next) => {
     Gym.find()
-        // .populate('users')
+        .populate('users')
         .exec()
         .then(docs => {
             console.log(docs);
