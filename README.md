@@ -1,4 +1,5 @@
-# Workout Together
+# Workout Together(Server)
+[link to client](https://github.com/jlee380/workout_client)
 
 This is a personal project to help people to find a workout partner near their workout place.
 
