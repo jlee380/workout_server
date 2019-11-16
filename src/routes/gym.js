@@ -48,7 +48,7 @@ router.post('/:gymId', (req, res, next) => {
     const userId = req.body.userId;
 
     Gym.findOne({ _id: gymId }, (err, gym) => {
-        //
+        // Checking if there is already the user in the gym
         const registeredUser = gym.users.filter(user => {
             return user._id === userId;
         });
@@ -113,63 +113,21 @@ router.post('/', (req, res, next) => {
         });
 });
 
-// Deleting a gym by id
-// router.delete('/:gymId', (req, res, next) => {
-//     const id = req.params.gymId;
-//     Gym.remove({ _id: id })
-//         .exec()
-//         .then(result => {
-//             res.status(200).json(result);
-//         })
-//         .catch(err => {
-//             console.log(err);
-//             res.status(500).json({
-//                 error: err
-//             });
-//         });
-// });
-
-// router.delete('/:gymId', (req, res, next) => {
-//     const id = req.params.gymId;
-//     Gym.remove({ _id: id })
-//         .exec()
-//         .then(result => {
-//             res.status(200).json(result);
-//         })
-//         .catch(err => {
-//             console.log(err);
-//             res.status(500).json({
-//                 error: err
-//             });
-//         });
-// });
-
 router.delete('/:gymId', (req, res, next) => {
     const gymId = req.params.gymId;
-    const userId = req.body.userId;
 
-    Gym.find({}, (err, gym) => {
-        if (err) {
+    Gym.remove({ _id: gymId })
+        .exec()
+        .then(result => {
+            res.status(200).json(result);
+        })
+        .catch(err => {
             console.log(err);
-            res.status(404).json({ message: 'No user exist' });
-        }
-        gym.users.map(user => {
-            if (user._id === userId) {
-                Gym.findByIdAndUpdate(gymId, { $pull: { users: userId } });
-            }
+            res.status(500).json({
+                error: err
+            });
         });
-    });
-    // Gym.find({ _id: gymId }, { $pull: userId })
-    //     .exec()
-    //     .then(result => {
-    //         console.log(result);
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //         res.status(500).json({
-    //             error: err
-    //         });
-    //     });
 });
+
 
 module.exports = router;

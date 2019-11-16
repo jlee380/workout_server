@@ -31,12 +31,16 @@ router.get('/:userId', (req, res, next) => {
             if (doc) {
                 res.status(200).json(doc);
             } else {
-                res.status(404).json({ message: 'No vaild user' });
+                res.status(404).json({
+                    message: 'No vaild user'
+                });
             }
         })
         .catch(err => {
             console.log(err);
-            res.status(500).json({ error: err });
+            res.status(500).json({
+                error: err
+            });
         });
 });
 
@@ -62,7 +66,9 @@ router.post('/add', (req, res, next) => {
         })
         .catch(err => {
             console.log(err);
-            res.status(500).json({ error: err });
+            res.status(500).json({
+                error: err
+            });
         });
 });
 
@@ -71,7 +77,11 @@ router.post('/:userId', (req, res, next) => {
     const gymId = req.body.gymId;
     const userId = req.params.userId;
 
-    Users.findByIdAndUpdate(userId, { $push: { gym: gymId } })
+    Users.findByIdAndUpdate(userId, {
+            $push: {
+                gym: gymId
+            }
+        })
         .exec()
         .then(result => {
             console.log(result);
@@ -82,68 +92,74 @@ router.post('/:userId', (req, res, next) => {
         })
         .catch(err => {
             console.log(err);
-            res.status(500).json({ error: err.message });
+            res.status(500).json({
+                error: err.message
+            });
         });
 });
 
 // REFECTORING
 
-// router.patch('/:userId', (req, res, next) => {
-//     const id = req.params.userId;
-//     const updateOperation = {};
-//     for (const paramter of req.body) {
-//         updateOperation[paramter.propName] = operation.value;
-//     }
+router.patch('/:userId', (req, res, next) => {
+    const id = req.params.userId;
 
-//     Users.update({ _id: id }, { $set: updateOperation })
-//         .exec()
-//         .then(result => {
-//             console.log(result);
-//             res.status(200).json(result);
-//         })
-//         .catch(err => {
-//             console.log(err);
-//             res.status(500).json({
-//                 error: err
-//             });
-//         });
-// });
+    // This is to allow to update whatever parameters provided in a request body
+    const updateOperation = {};
+    for (const paramter of req.body) {
+        updateOperation[paramter.propName] = paramter.value;
+    }
 
-// Deleting a user by id
-router.delete('/:userId', (req, res, next) => {
-    const userId = req.params.userId;
-
-    // Users.findOne({ _id: userId }, (err, user) => {
-    //     if (err) {
-    //         console.log(err);
-    //         res.status(404).json({ message: 'No user found' });
-    //     }
-
-    //     user.gym.map(g => {
-    //         Users.findByIdAndUpdate(userId, { $pull: { gym: g } })
-    //             .exec()
-    //             .then(result => {
-    //                 console.log(result);
-    //                 res.status(200).json(result);
-    //             })
-    //             .catch(err => {
-    //                 console.log(err);
-    //                 res.status(404).json({ error: err });
-    //             });
-    //     });
-    // });
-
-    // Users.remove({ _id: userId })
-    //     .exec()
-    //     .then(result => {
-    //         res.status(200).json(result);
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //         res.status(500).json({
-    //             error: err
-    //         });
-    //     });
+    Users.update({ _id: id }, { $set: updateOperation })
+        .exec()
+        .then(result => {
+            console.log(result);
+            res.status(200).json(result);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
 });
 
-module.exports = router;
+// Deleting a user by id
+router.delete('/:userId', async (req, res, next) => {
+    const userId = req.params.userId;
+    // Deleting this user from every gyms registered
+
+    Gym.find({}, (err, gyms) => {
+        if (err) console.log(err);
+
+        const userRemovalPromise =
+            Users.remove({
+                _id: userId
+            })
+            .exec()
+
+        const userInGymsRemovalPromises = gyms.reduce((prev, curr) => {
+            return prev.concat(curr.users.map((user, i) => {
+                if (user == userId) {
+                    return Gym.findByIdAndUpdate(g._id, {
+                            $pull: {
+                                users: userId
+                            }
+                        })
+                        .exec()
+                }
+            }))
+        }, [userRemovalPromise]);
+
+        Promise.all(userInGymsRemovalPromises)
+            .then(results => {
+                res.status(200).json({
+                    results
+                });
+            })
+            .catch(err => {
+                res.status(500).json({
+                    error: err
+                });
+            })
+    });
+});
